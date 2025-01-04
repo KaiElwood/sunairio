@@ -19,7 +19,6 @@ interface LineChartProps {
 const LineChart: React.FC<LineChartProps> = ({ data, percentiles, interval, height = 400 }) => {
   const chartRef = useRef<HTMLDivElement | null>(null);
   const { width } = useResizeObserver(chartRef);
-  console.log(data);
   // Dimensions and margins
   const margin = { top: 20, right: 30, bottom: 40, left: 50 };
   const innerWidth = width - margin.left - margin.right;
