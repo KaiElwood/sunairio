@@ -1,14 +1,25 @@
 import { select } from 'd3-selection';
 import { axisBottom, axisLeft } from 'd3-axis';
-import { timeFormat } from 'd3';
+import { timeFormat, timeParse } from 'd3';
 import { ChartDataPoint, IntervalOption } from '../types';
 import { toZonedTime } from 'date-fns-tz';
+
+export const parseHoursTime = timeParse('%Y-%m-%d %H');
+
+export const parseToDate: (d: string) => Date = (d: string) => {
+  // if the input format is %Y-%m-%d %H, parse it accordingly
+  if (d.includes(' ')) {
+    return parseHoursTime(d) || new Date(0);
+  }
+  const date = new Date(d.valueOf());
+  return date;
+};
 
 function getTickFormat(interval: IntervalOption) {
   const formatTime = (d: number | { valueOf(): number }) => {
     const date = toZonedTime(d.valueOf(), 'America/Chicago');
     if (interval === '%Y-%m-%d %H') {
-      return timeFormat('%H:00')(date); // Hours
+      return timeFormat('%m/%d')(date); // Days
     } else if (interval === '%Y-%m-%d') {
       return timeFormat('%m/%d')(date); // Days
     } else if (interval === '%Y-%m') {
@@ -24,9 +35,8 @@ export function createAxisBottom(node: SVGGElement | null, xScale: d3.ScaleTime<
   
   if (node) {
     const tickValues = data.length <= 4
-      ? data.map(d => new Date(d.time)) // Use all data points if there are 4 or fewer
+      ? data.map(d => parseToDate(d.time)) // Use all data points if there are 4 or fewer
       : xScale.ticks(10); // Otherwise, use up to 10 evenly spaced ticks
-
     select(node).call(
       axisBottom(xScale)
         .tickValues(tickValues)

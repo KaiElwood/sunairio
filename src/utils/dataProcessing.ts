@@ -11,12 +11,12 @@ export async function fetchCSV(): Promise<ParsedData[]> {
   return data.map(d => {
     const data: { [key: number]: number } = {};
     for (let i = 1; i <= 999; i++) {
-      data[i] = +(d[i] as string); // Map each percentile column
+      data[i] = +(d[i] as string);
     }
-    const originalTime = new Date(d.sim_datetime as string); // Assuming the timestamp is a valid ISO string
+    const originalTime = new Date(d.sim_datetime as string);
     const adjustedTime = new Date(originalTime.getTime() - 60 * 60 * 1000);
     return {
-      time: adjustedTime, // Assuming a `timestamp` column
+      time: adjustedTime,
       data,
     };
   });
@@ -41,12 +41,11 @@ export function groupAndAggregate(
   const results: ChartDataPoint[] = [];
 
   for (const [groupKey, rows] of grouped) {
-    // console.log(`Processing Group: ${groupKey}`, rows);
 
     for (const percentile of percentiles) {
       const columnAggregates = Array.from({ length: 999 }, (_, colIndex) => {
-        const columnValues = rows.map(row => row.data[colIndex + 1]); // Extract column values (1-based indexing)
-        return aggregationFunction(columnValues) || 0; // Apply aggregation function (mean, min, max)
+        const columnValues = rows.map(row => row.data[colIndex + 1]);
+        return aggregationFunction(columnValues) || 0;
       });
       const data = quantile(columnAggregates, percentile/100) || 0 ;
       results.push({ time: groupKey, [`P${percentile}`]: data } as ChartDataPoint);
